@@ -39,18 +39,108 @@ interface TrendingArtist {
   monthlyListeners: string;
 }
 
-// Sample song data - this would come from an API in a real app
-const topPicks: Song[] = [
-  { id: 1, title: 'Midnight Rain', artist: 'Taylor Swift', audioFile: '/mrbluesky.mp3', poster: '/midnightrain.png' },
-  { id: 2, title: 'As It Was', artist: 'Harry Styles', audioFile: '/Electric Light Orchestra - Don\'t Bring Me Down (Official Video).mp3', poster: '/asitwas.png' },
-  { id: 3, title: 'About Damn Time', artist: 'Lizzo', audioFile: '/Electric Light Orchestra - Livin\' Thing (Audio).mp3', poster: '/aboutdamntime.png' },
-  { id: 4, title: 'Stay', artist: 'Kid LAROI & Justin Bieber', audioFile: '/runaway.mp3', poster: '/stay.png' },
-  { id: 5, title: 'Bad Habit', artist: 'Steve Lacy', audioFile: '/trafficinsky.mp3', poster: '/badhabits.png' },
-  { id: 6, title: 'Flowers', artist: 'Miley Cyrus', audioFile: '/walkinonadream.mp3', poster: '/flowers.jpg' },
-  { id: 7, title: 'Anti-Hero', artist: 'Taylor Swift', audioFile: '/mrbluesky.mp3', poster: '/antihero.png' },
-  { id: 8, title: 'Rich Flex', artist: 'Drake & 21 Savage', audioFile: '/Electric Light Orchestra - Don\'t Bring Me Down (Official Video).mp3', poster: '/richflex.png' },
-  { id: 9, title: 'Unholy', artist: 'Sam Smith & Kim Petras', audioFile: '/Electric Light Orchestra - Livin\' Thing (Audio).mp3', poster: '/unholy.png' },
-  { id: 10, title: 'Break My Soul', artist: 'Beyoncé', audioFile: '/runaway.mp3', poster: '/breakmysould.png' }
+// Top picks data
+const topPicks: Album[] = [
+  { 
+    id: 1, 
+    title: 'Midnight Rain', 
+    artist: 'Taylor Swift',
+    year: '2022',
+    image: '/midnightrain.png',
+    audioFile: '/audio/[4K] Taylor Swift - Midnight Rain (From The Eras Tour).mp3',
+    poster: '/midnightrain.png',
+    description: 'A hauntingly beautiful track from Taylor Swift\'s Midnights album'
+  },
+  { 
+    id: 2, 
+    title: 'As It Was', 
+    artist: 'Harry Styles',
+    year: '2022',
+    image: '/asitwas.png',
+    audioFile: '/audio/Harry Styles - As It Was (Official Video).mp3',
+    poster: '/asitwas.png',
+    description: 'A nostalgic pop anthem from Harry Styles\' third studio album'
+  },
+  { 
+    id: 3, 
+    title: 'About Damn Time', 
+    artist: 'Lizzo',
+    year: '2022',
+    image: '/aboutdamntime.png',
+    audioFile: '/audio/Lizzo - About Damn Time [Official Video].mp3',
+    poster: '/aboutdamntime.png',
+    description: 'An empowering disco-pop track from Lizzo\'s Special album'
+  },
+  { 
+    id: 4, 
+    title: 'Bad Habit', 
+    artist: 'Steve Lacy',
+    year: '2022',
+    image: '/badhabits.png',
+    audioFile: '/audio/Steve Lacy - Bad Habit (Official Video).mp3',
+    poster: '/badhabits.png',
+    description: 'A smooth R&B track from Steve Lacy\'s Gemini Rights album'
+  },
+  { 
+    id: 5, 
+    title: 'STAY', 
+    artist: 'The Kid LAROI, Justin Bieber',
+    year: '2021',
+    image: '/stay.png',
+    audioFile: '/audio/The Kid LAROI, Justin Bieber - STAY (Official Video).mp3',
+    poster: '/stay.png',
+    description: 'A chart-topping collaboration between The Kid LAROI and Justin Bieber'
+  },
+  { 
+    id: 6, 
+    title: 'Flowers', 
+    artist: 'Miley Cyrus',
+    year: '2023',
+    image: '/flowers.jpg',
+    audioFile: '/audio/Miley Cyrus - Flowers (Official Video).mp3',
+    poster: '/flowers.jpg',
+    description: 'A powerful breakup anthem from Miley Cyrus'
+  },
+  { 
+    id: 7, 
+    title: 'Anti-Hero', 
+    artist: 'Taylor Swift',
+    year: '2022',
+    image: '/antihero.png',
+    audioFile: '/audio/Taylor Swift - Anti-Hero (Official Music Video).mp3',
+    poster: '/antihero.png',
+    description: 'A self-reflective track from Taylor Swift\'s Midnights album'
+  },
+  { 
+    id: 8, 
+    title: 'Rich Flex', 
+    artist: 'Drake, 21 Savage',
+    year: '2022',
+    image: '/richflex.png',
+    audioFile: '/audio/Drake, 21 Savage - Rich Flex (Audio).mp3',
+    poster: '/richflex.png',
+    description: 'A collaboration between Drake and 21 Savage from their joint album'
+  },
+  { 
+    id: 9, 
+    title: 'Unholy', 
+    artist: 'Sam Smith, Kim Petras',
+    year: '2022',
+    image: '/unholy.png',
+    audioFile: '/audio/Sam Smith, Kim Petras - Unholy (Official Music Video).mp3',
+    poster: '/unholy.png',
+    description: 'A provocative collaboration between Sam Smith and Kim Petras'
+  },
+  { 
+    id: 10, 
+    title: 'BREAK MY SOUL', 
+    artist: 'Beyoncé',
+    year: '2022',
+    image: '/breakmysoul.png',
+    audioFile: '/audio/Beyoncé - BREAK MY SOUL (Official Lyric Video).mp3',
+    poster: '/breakmysoul.png',
+    description: 'A dance anthem from Beyoncé\'s Renaissance album'
+  }
 ];
 
 // Fresh Out albums data with images
@@ -173,15 +263,64 @@ export default function Home() {
   
   // Load liked songs from localStorage on mount
   useEffect(() => {
-    const savedLikes = localStorage.getItem('likedSongs');
-    if (savedLikes) {
-      setLikedSongs(JSON.parse(savedLikes));
+    try {
+      const savedLikes = localStorage.getItem('likedSongs');
+      if (savedLikes) {
+        const parsedLikes = JSON.parse(savedLikes);
+        if (JSON.stringify(likedSongs) !== JSON.stringify(parsedLikes)) {
+          setLikedSongs(parsedLikes);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading liked songs:', error);
     }
   }, []);
 
   // Save liked songs to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('likedSongs', JSON.stringify(likedSongs));
+    try {
+      localStorage.setItem('likedSongs', JSON.stringify(likedSongs));
+    } catch (error) {
+      console.error('Error saving liked songs:', error);
+    }
+  }, [likedSongs]);
+
+  // Listen for storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'likedSongs' && e.newValue) {
+        try {
+          const newLikes = JSON.parse(e.newValue);
+          if (JSON.stringify(likedSongs) !== JSON.stringify(newLikes)) {
+            setLikedSongs(newLikes);
+          }
+        } catch (error) {
+          console.error('Error parsing liked songs from storage:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [likedSongs]);
+
+  // Add a more frequent check for storage changes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const currentLikes = localStorage.getItem('likedSongs');
+        if (currentLikes) {
+          const parsedLikes = JSON.parse(currentLikes);
+          if (JSON.stringify(likedSongs) !== JSON.stringify(parsedLikes)) {
+            setLikedSongs(parsedLikes);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking storage:', error);
+      }
+    }, 500); // Check more frequently
+
+    return () => clearInterval(interval);
   }, [likedSongs]);
 
   // Format time in MM:SS format
@@ -356,17 +495,15 @@ export default function Home() {
   };
 
   // Modify the toggleFavorite function to handle individual songs
-  const toggleFavorite = () => {
-    if (!currentTrack) return;
-
-    const newLikedSongs = likedSongs.includes(currentTrack.id)
-      ? likedSongs.filter(id => id !== currentTrack.id)
-      : [...likedSongs, currentTrack.id];
+  const toggleFavorite = (trackId: number) => {
+    const newLikedSongs = likedSongs.includes(trackId)
+      ? likedSongs.filter(id => id !== trackId)
+      : [...likedSongs, trackId];
     
     setLikedSongs(newLikedSongs);
     
     // Only trigger animation when liking
-    if (!likedSongs.includes(currentTrack.id)) {
+    if (!likedSongs.includes(trackId)) {
       setIsShimmering(true);
       setTimeout(() => setIsShimmering(false), 600);
     }
@@ -389,34 +526,32 @@ export default function Home() {
 
   // Find next track in the current section
   const findNextTrack = (currentId: number, direction: 'forward' | 'backward', section: 'tune-in' | 'top-picks') => {
-    console.log(`Finding next track in section: ${section}`);
+    console.log(`Finding random track from all available songs`);
     
-    // Get the appropriate tracks array based on section
-    const tracks = section === 'tune-in' ? freshOutAlbums : topPicks;
-    console.log('Available tracks:', tracks.map(t => t.title));
+    // Combine both track arrays
+    const allTracks = [...topPicks, ...freshOutAlbums];
+    console.log('Total available tracks:', allTracks.length);
     
-    // Find current track index
-    const currentIndex = tracks.findIndex(track => track.id === currentId);
-    console.log('Current track index:', currentIndex);
+    // Filter out hidden tracks and ensure they have audio files
+    const availableTracks = allTracks.filter(track => !track.hidden && track.audioFile);
     
-    if (currentIndex === -1) {
-      console.log('Current track not found in section');
+    if (availableTracks.length === 0) {
+      console.log('No available tracks');
       return null;
     }
     
-    // Calculate next index
-    let nextIndex;
-    if (direction === 'forward') {
-      nextIndex = (currentIndex + 1) % tracks.length;
-    } else {
-      nextIndex = (currentIndex - 1 + tracks.length) % tracks.length;
+    // Pick a random track from the available tracks
+    const randomIndex = Math.floor(Math.random() * availableTracks.length);
+    const randomTrack = availableTracks[randomIndex];
+    
+    // Make sure we don't get the same track
+    if (randomTrack.id === currentId && availableTracks.length > 1) {
+      // Try again to get a different track
+      return findNextTrack(currentId, direction, section);
     }
-    console.log('Next track index:', nextIndex);
     
-    const nextTrack = tracks[nextIndex];
-    console.log('Selected next track:', nextTrack.title);
-    
-    return nextTrack;
+    console.log('Selected random track:', randomTrack.title);
+    return randomTrack;
   };
 
   // Handle forward/backward
@@ -424,32 +559,9 @@ export default function Home() {
     if (!currentTrack) return;
     
     console.log('Current track:', currentTrack.title, 'ID:', currentTrack.id);
-    console.log('Active section:', activeSection);
     
-    // Determine which section the current track is from
-    let section: 'tune-in' | 'top-picks';
-    
-    // Check if the track is in the freshOutAlbums array
-    const isInFreshOut = freshOutAlbums.some(album => album.id === currentTrack.id);
-    console.log('Is in tune-in:', isInFreshOut);
-    
-    // Check if the track is in the topPicks array
-    const isInTopPicks = topPicks.some(song => song.id === currentTrack.id);
-    console.log('Is in top-picks:', isInTopPicks);
-    
-    if (isInFreshOut) {
-      section = 'tune-in';
-    } 
-    else if (isInTopPicks) {
-      section = 'top-picks';
-    } 
-    // Default to the active section if we can't determine
-    else {
-      section = activeSection as 'tune-in' | 'top-picks';
-    }
-    
-    console.log(`Skipping ${direction} in section: ${section}`);
-    const nextTrack = findNextTrack(currentTrack.id, direction, section);
+    console.log(`Picking random track from all available songs`);
+    const nextTrack = findNextTrack(currentTrack.id, direction, 'top-picks'); // Section parameter is no longer used
     
     if (nextTrack) {
       console.log(`Next track: ${nextTrack.title} (${nextTrack.artist})`);
@@ -457,19 +569,39 @@ export default function Home() {
     }
   };
 
-  // Add keyboard event listener for spacebar
+  // Add keyboard event listener for playback control
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Space' && currentTrack) {
-        event.preventDefault(); // Prevent page scroll
-        if (isPlaying) {
-          audioRef.current?.pause();
-        } else {
-          audioRef.current?.play().catch(error => {
-            console.error('Error playing audio:', error);
-          });
-        }
-        setIsPlaying(!isPlaying);
+      // Only process keyboard shortcuts if we have a track playing or loaded
+      if (!currentTrack) return;
+      
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault(); // Prevent page scroll
+          if (isPlaying) {
+            audioRef.current?.pause();
+          } else {
+            audioRef.current?.play().catch(error => {
+              console.error('Error playing audio:', error);
+            });
+          }
+          setIsPlaying(!isPlaying);
+          break;
+          
+        case 'ArrowRight':
+          event.preventDefault();
+          handleSkipTrack('forward');
+          break;
+          
+        case 'ArrowLeft':
+          event.preventDefault();
+          handleSkipTrack('backward');
+          break;
+          
+        case 'KeyM':
+          event.preventDefault();
+          toggleMute();
+          break;
       }
     };
 
@@ -477,7 +609,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [currentTrack, isPlaying]); // Re-run when currentTrack or isPlaying changes
+  }, [currentTrack, isPlaying, handleSkipTrack, toggleMute]);
 
   return (
     <div>
@@ -541,7 +673,7 @@ export default function Home() {
                     {topPicks.map((song) => (
                       <div 
                         key={song.id} 
-                        className="group flex-shrink-0 w-[200px] p-4 rounded-xl transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] cursor-pointer"
+                        className="group flex-shrink-0 w-[200px] p-4 rounded-xl transition-all duration-500 ease-in-out hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] cursor-pointer mt-1 mx-1"
                         onClick={() => song.audioFile && togglePlay(song)}
                       >
                         <div className="aspect-square bg-white/10 rounded-lg mb-3 flex items-center justify-center transition-all duration-500 group-hover:bg-white/20 relative overflow-hidden">
@@ -559,8 +691,31 @@ export default function Home() {
                             <PlayIcon className="w-12 h-12 text-white" />
                           </div>
                         </div>
-                        <h3 className="font-medium truncate text-white">{song.title}</h3>
-                        <p className="text-sm text-white/70 truncate">{song.artist}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate text-white">{song.title}</h3>
+                            <p className="text-sm text-white/70 truncate whitespace-nowrap overflow-hidden">
+                              {song.title === 'Stay' || song.title === 'Unholy' ? (
+                                <span className="inline-block animate-marquee">{song.artist}</span>
+                              ) : (
+                                song.artist
+                              )}
+                            </p>
+                          </div>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFavorite(song.id);
+                            }}
+                            className="ml-2 p-1 hover:opacity-80 transition-all duration-300 flex-shrink-0"
+                          >
+                            {likedSongs.includes(song.id) ? (
+                              <HeartIcon className="w-5 h-5 text-red-500" />
+                            ) : (
+                              <HeartOutlineIcon className="w-5 h-5 text-white" />
+                            )}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -821,7 +976,10 @@ export default function Home() {
 
                         {/* Heart Button */}
                         <button
-                          onClick={toggleFavorite}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(currentTrack.id);
+                          }}
                           className={`w-12 h-12 flex items-center justify-center cursor-pointer transition-all duration-300 ${
                             isShimmering ? 'animate-heart-bounce' : ''
                           }`}
@@ -978,6 +1136,21 @@ export default function Home() {
             min-height: unset !important;
             height: auto !important;
             overflow: visible !important;
+          }
+
+          @keyframes marquee {
+            0% {
+              transform: translateX(0);
+            }
+            100% {
+              transform: translateX(-100%);
+            }
+          }
+
+          .animate-marquee {
+            animation: marquee 10s linear infinite;
+            display: inline-block;
+            padding-left: 100%;
           }
         `}</style>
         

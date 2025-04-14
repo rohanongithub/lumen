@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, BackwardIcon, ForwardIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTransition } from '@/components/TransitionProvider';
@@ -21,96 +22,93 @@ interface Album {
 const sampleAlbums: Album[] = [
   { 
     id: 1, 
-    title: 'Mr. Blue Sky', 
-    artist: 'Electric Light Orchestra',
-    year: '1977',
+    title: 'BREAK MY SOUL', 
+    artist: 'Beyoncé',
+    year: '2022',
     image: '/images/electric.jpg',
-    audioFile: '/mrbluesky.mp3',
+    audioFile: '/audio/Beyoncé - BREAK MY SOUL (Official Lyric Video).mp3',
     poster: '/mrblueposter.jpg'
   },
   { 
     id: 2, 
-    title: "Don't Bring Me Down", 
-    artist: 'Electric Light Orchestra',
-    year: '1979',
+    title: 'Unholy', 
+    artist: 'Sam Smith, Kim Petras',
+    year: '2022',
     image: '/images/car-vintage.jpg',
-    audioFile: '/Electric Light Orchestra - Don\'t Bring Me Down (Official Video).mp3',
+    audioFile: '/audio/Sam Smith, Kim Petras - Unholy (Official Music Video).mp3',
     poster: '/livin.jpg'
   },
   { 
     id: 3, 
-    title: "Livin' Thing", 
-    artist: 'Electric Light Orchestra',
-    year: '1976',
+    title: 'Rich Flex', 
+    artist: 'Drake, 21 Savage',
+    year: '2022',
     image: '/images/concert.jpg',
-    audioFile: '/Electric Light Orchestra - Livin\' Thing (Audio).mp3',
+    audioFile: '/audio/Drake, 21 Savage - Rich Flex (Audio).mp3',
     poster: '/livin.jpg'
   },
   { 
     id: 4, 
-    title: 'Vintage Roads', 
-    artist: 'The Nostalgics',
-    year: '2023',
+    title: 'Anti-Hero', 
+    artist: 'Taylor Swift',
+    year: '2022',
     image: '/images/car-vintage.jpg',
-    audioFile: '/runaway.mp3',
+    audioFile: '/audio/Taylor Swift - Anti-Hero (Official Music Video).mp3',
     poster: '/runawayimage.jpeg'
   },
   { 
     id: 5, 
-    title: 'Traffic in Sky', 
-    artist: 'The Nostalgics',
+    title: 'Flowers', 
+    artist: 'Miley Cyrus',
     year: '2023',
     image: '/asitwas.png',
-    audioFile: '/trafficinsky.mp3',
+    audioFile: '/audio/Miley Cyrus - Flowers (Official Video).mp3',
     poster: '/trafficsky.jpeg'
   },
   { 
     id: 6, 
-    title: 'Walking on a Dream', 
-    artist: 'The Nostalgics',
-    year: '2023',
+    title: 'Bad Habit', 
+    artist: 'Steve Lacy',
+    year: '2022',
     image: '/aboutdamntime.png',
-    audioFile: '/walkinonadream.mp3',
+    audioFile: '/audio/Steve Lacy - Bad Habit (Official Video).mp3',
     poster: '/walkingdream.jpeg'
   },
   { 
     id: 7, 
-    title: 'Live at the Arena', 
-    artist: 'The Concert Experience',
-    year: '2023',
-    image: '/images/concert.jpg'
+    title: 'STAY', 
+    artist: 'The Kid LAROI, Justin Bieber',
+    year: '2021',
+    image: '/images/concert.jpg',
+    audioFile: '/audio/The Kid LAROI, Justin Bieber - STAY (Official Video).mp3',
+    poster: '/livin.jpg'
   },
   { 
     id: 8, 
-    title: 'Midnight Rain', 
-    artist: 'Taylor Swift',
+    title: 'About Damn Time', 
+    artist: 'Lizzo',
+    year: '2022',
     image: '/midnightrain.png',
-    audioFile: '/mrbluesky.mp3',
+    audioFile: '/audio/Lizzo - About Damn Time [Official Video].mp3',
     poster: '/midnightrain.png'
   },
   { 
     id: 9, 
     title: 'As It Was', 
     artist: 'Harry Styles',
+    year: '2022',
     image: '/asitwas.png',
-    audioFile: '/Electric Light Orchestra - Don\'t Bring Me Down (Official Video).mp3',
+    audioFile: '/audio/Harry Styles - As It Was (Official Video).mp3',
     poster: '/asitwas.png'
   },
   { 
     id: 10, 
-    title: 'About Damn Time', 
-    artist: 'Lizzo',
+    title: 'Midnight Rain', 
+    artist: 'Taylor Swift',
+    year: '2022',
     image: '/aboutdamntime.png',
-    audioFile: '/Electric Light Orchestra - Livin\' Thing (Audio).mp3',
+    audioFile: '/audio/[4K] Taylor Swift - Midnight Rain (From The Eras Tour).mp3',
     poster: '/aboutdamntime.png'
-  },
-  { 
-    id: 11, 
-    title: 'Bad Habit', 
-    artist: 'Steve Lacy',
-    image: '/badhabits.png',
-    audioFile: '/trafficinsky.mp3',
-    poster: '/badhabits.png'
   }
 ];
 
@@ -140,10 +138,18 @@ export default function SearchPage() {
   const [showResults, setShowResults] = useState(false);
   const [randomQuote, setRandomQuote] = useState({ quote: "", author: "" });
   const [showQuote, setShowQuote] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState<Album | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
   const { startTransition } = useTransition();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Select a random quote when the page loads and animate it in
   useEffect(() => {
@@ -229,12 +235,233 @@ export default function SearchPage() {
     }
   };
 
+  // Handle audio playback
+  const handlePlayPause = (album: Album) => {
+    if (!album.audioFile) {
+      console.error('No audio file available for this track');
+      return;
+    }
+
+    // Ensure we're using the correct track data
+    const trackToPlay = {
+      ...album,
+      poster: album.poster || album.image, // Use poster if available, fallback to image
+      title: album.title,
+      artist: album.artist,
+      audioFile: album.audioFile
+    };
+
+    if (currentTrack?.id === album.id) {
+      if (isPlaying) {
+        audioRef.current?.pause();
+      } else {
+        audioRef.current?.play();
+      }
+      setIsPlaying(!isPlaying);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setCurrentTrack(trackToPlay);
+      setIsPlaying(true);
+      
+      // Create new audio element
+      const audio = new Audio(trackToPlay.audioFile);
+      audioRef.current = audio;
+      
+      // Add error handling
+      audio.onerror = (e) => {
+        console.error('Error playing audio:', e);
+        setIsPlaying(false);
+        setCurrentTrack(null);
+      };
+      
+      // Add ended event handler
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentTrack(null);
+      };
+      
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        setCurrentTrack(null);
+      });
+    }
+  };
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Format time in MM:SS format
+  const formatTime = (seconds: number): string => {
+    if (isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Handle progress bar click
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current) {
+      const progressBar = e.currentTarget;
+      const rect = progressBar.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      const newTime = percent * audioRef.current.duration;
+      
+      audioRef.current.currentTime = newTime;
+      setProgress(percent * 100);
+    }
+  };
+
+  // Add new handlers for progress bar dragging
+  const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    handleProgressUpdate(e);
+  };
+
+  const handleProgressMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      handleProgressUpdate(e);
+    }
+  };
+
+  const handleProgressMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleProgressUpdate = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current) {
+      const progressBar = e.currentTarget;
+      const rect = progressBar.getBoundingClientRect();
+      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const newTime = percent * audioRef.current.duration;
+      
+      audioRef.current.currentTime = newTime;
+      setProgress(percent * 100);
+    }
+  };
+
+  // Update progress bar while playing
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const updateProgress = () => {
+      if (audioRef.current) {
+        const percent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+        setProgress(percent);
+      }
+    };
+
+    audioRef.current.addEventListener('timeupdate', updateProgress);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', updateProgress);
+      }
+    };
+  }, [currentTrack]);
+
+  // Handle volume changes
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  };
+
+  // Handle mute toggle
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.volume = volume;
+      } else {
+        audioRef.current.volume = 0;
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
+  // Handle forward/backward navigation
+  const handleSkipTrack = (direction: 'forward' | 'backward') => {
+    if (!currentTrack) return;
+    
+    // Find the current track's index in the search results
+    const currentIndex = searchResults.findIndex(album => album.id === currentTrack.id);
+    
+    if (currentIndex === -1) return;
+    
+    // Calculate the next/previous index
+    let nextIndex;
+    if (direction === 'forward') {
+      nextIndex = (currentIndex + 1) % searchResults.length;
+    } else {
+      nextIndex = (currentIndex - 1 + searchResults.length) % searchResults.length;
+    }
+    
+    // Get the next/previous track
+    const nextTrack = searchResults[nextIndex];
+    
+    if (nextTrack) {
+      handlePlayPause(nextTrack);
+    }
+  };
+
+  // Add keyboard event listener for playback control
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only process keyboard shortcuts if we have a track playing or loaded
+      if (!currentTrack) return;
+      
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault(); // Prevent page scroll
+          if (isPlaying) {
+            audioRef.current?.pause();
+          } else {
+            audioRef.current?.play().catch(error => {
+              console.error('Error playing audio:', error);
+            });
+          }
+          setIsPlaying(!isPlaying);
+          break;
+          
+        case 'ArrowRight':
+          event.preventDefault();
+          handleSkipTrack('forward');
+          break;
+          
+        case 'ArrowLeft':
+          event.preventDefault();
+          handleSkipTrack('backward');
+          break;
+          
+        case 'KeyM':
+          event.preventDefault();
+          toggleMute();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [currentTrack, isPlaying, handleSkipTrack, toggleMute]);
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center">
       {/* Centered Translucent Search Bar */}
       <div className="w-full max-w-lg px-4 mt-32 mb-8">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
             <MagnifyingGlassIcon className="h-5 w-5 text-white/70" />
           </div>
           <input
@@ -243,7 +470,7 @@ export default function SearchPage() {
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Vibe check..."
-            className="w-full h-14 pl-12 pr-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 focus:border-white/40 text-white placeholder-white/50 focus:outline-none transition-all shadow-lg"
+            className="w-full h-14 pl-12 pr-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 focus:border-amber-400/50 focus:ring-2 focus:ring-amber-400/30 text-white placeholder-white/50 focus:outline-none transition-all duration-300 shadow-lg relative z-0"
             autoFocus
           />
           {searchQuery && (
@@ -308,6 +535,20 @@ export default function SearchPage() {
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Play/Pause Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button 
+                      onClick={() => handlePlayPause(album)}
+                      className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-all duration-300 cursor-pointer"
+                    >
+                      {currentTrack?.id === album.id && isPlaying ? (
+                        <PauseIcon className="w-6 h-6 text-white" />
+                      ) : (
+                        <PlayIcon className="w-6 h-6 text-white" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <h3 className="text-sm font-medium text-white line-clamp-1">{album.title}</h3>
                 <p className="text-xs text-white/60 line-clamp-1">{album.artist}</p>
@@ -325,6 +566,123 @@ export default function SearchPage() {
           No matching albums found
         </div>
       )}
+
+      {/* Audio Player */}
+      {currentTrack && (
+        <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
+          <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
+            {/* Background Image */}
+            {currentTrack.poster && (
+              <div className="absolute inset-0 -z-10 transition-opacity duration-500 opacity-[0.15]">
+                <Image
+                  src={currentTrack.poster}
+                  alt=""
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            <div 
+              className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
+              onMouseDown={handleProgressMouseDown}
+              onMouseMove={handleProgressMouseMove}
+              onMouseUp={handleProgressMouseUp}
+              onClick={handleProgressClick}
+              style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
+            >
+              <div 
+                className="h-full bg-white/70 rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              ></div>
+              <div 
+                className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full transition-opacity duration-300 ${
+                  isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
+                style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
+              ></div>
+            </div>
+            
+            {/* Controls */}
+            <div className="flex items-center justify-between relative z-10">
+              {/* Track Info */}
+              <div className="flex-1">
+                <p className="text-white text-sm font-medium">{currentTrack.title}</p>
+                <p className="text-white/60 text-xs">{currentTrack.artist}</p>
+              </div>
+              
+              {/* Playback Controls */}
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                  onClick={() => handleSkipTrack('backward')}
+                >
+                  <BackwardIcon className="w-4 h-4" />
+                </div>
+                
+                <div 
+                  className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all duration-300"
+                  onClick={() => handlePlayPause(currentTrack)}
+                >
+                  {isPlaying ? (
+                    <PauseIcon className="w-4 h-4 text-white" />
+                  ) : (
+                    <PlayIcon className="w-4 h-4 text-white" />
+                  )}
+                </div>
+                
+                <div 
+                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                  onClick={() => handleSkipTrack('forward')}
+                >
+                  <ForwardIcon className="w-4 h-4" />
+                </div>
+              </div>
+              
+              {/* Right Controls */}
+              <div className="flex items-center gap-2 flex-1 justify-end">
+                <button 
+                  className="p-2 text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/10"
+                  onClick={toggleMute}
+                >
+                  {isMuted ? (
+                    <SpeakerXMarkIcon className="w-4 h-4" />
+                  ) : (
+                    <SpeakerWaveIcon className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {/* Time Display */}
+            <div className="flex justify-between text-xs text-white/50 mt-2 relative z-10">
+              <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
+              <span>{formatTime(audioRef.current?.duration || 0)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add keyframes for animations */}
+      <style jsx global>{`
+        @keyframes goldenGlow {
+          0% {
+            box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+          }
+          50% {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+          }
+          100% {
+            box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+          }
+        }
+
+        input:focus {
+          animation: goldenGlow 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 } 
