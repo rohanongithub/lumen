@@ -6,9 +6,24 @@ import { useState, useEffect } from 'react';
 const colorCycles = [
   { name: 'light purple', value: 'rgba(200, 150, 255, 0.5)' },
   { name: 'silver', value: 'rgba(192, 192, 192, 0.5)' },
-  { name: 'light pink', value: 'rgba(255, 182, 193, 0.5)' },
+  { name: 'light pink', value: 'rgba(181, 101, 113, 0.5)' },
   { name: 'khaki', value: 'rgba(240, 230, 140, 0.5)' },
   { name: 'light red', value: 'rgba(255, 160, 122, 0.5)' },
+  { name: 'bright white', value: 'rgba(255, 255, 255, 0.5)' },
+  { name: 'mint green', value: 'rgba(152, 255, 152, 0.5)' },
+  { name: 'sky blue', value: 'rgba(135, 206, 235, 0.5)' },
+  { name: 'lavender', value: 'rgba(230, 230, 250, 0.5)' },
+  { name: 'pale yellow', value: 'rgba(255, 255, 102, 0.5)' },
+  { name: 'peach', value: 'rgba(255, 218, 185, 0.5)' },
+  { name: 'light turquoise', value: 'rgba(23, 233, 233, 0.5)' },
+  { name: 'rose gold', value: 'rgba(248, 188, 178, 0.5)' },
+  { name: 'coral', value: 'rgba(255, 127, 80, 0.5)' },
+  { name: 'electric blue', value: 'rgba(125, 249, 255, 0.5)' },
+  { name: 'pastel violet', value: 'rgba(221, 160, 221, 0.5)' },
+  { name: 'aurora pink', value: 'rgba(255, 191, 209, 0.5)' },
+  { name: 'neon lime', value: 'rgba(204, 255, 0, 0.4)' },
+  { name: 'magic mint', value: 'rgba(170, 240, 209, 0.5)' },
+  { name: 'dreamy lilac', value: 'rgba(235, 125, 235, 0.5)' },
 ];
 
 const gradients = {
@@ -28,6 +43,7 @@ const gradients = {
 
 export default function PageBackground() {
   const pathname = usePathname();
+  const isLumenAIPage = pathname === '/lumenai';
   const gradient = gradients[pathname as keyof typeof gradients] || gradients['/'];
   const [colorIndex, setColorIndex] = useState(0);
   const [currentColor, setCurrentColor] = useState(colorCycles[0].value);
@@ -35,6 +51,8 @@ export default function PageBackground() {
   const [transitionProgress, setTransitionProgress] = useState(0);
 
   useEffect(() => {
+    if (isLumenAIPage) return; // Skip color transitions for LumenAI page
+
     const transitionDuration = 5000; // 5 seconds per color
     const interval = 50; // Update every 50ms for smooth transition
     const steps = transitionDuration / interval;
@@ -60,10 +78,11 @@ export default function PageBackground() {
     }, interval);
 
     return () => clearInterval(transitionTimer);
-  }, [colorIndex]);
+  }, [colorIndex, isLumenAIPage]);
 
   // Calculate the interpolated color based on transition progress
   const getInterpolatedColor = () => {
+    if (isLumenAIPage) return colorCycles[19].value; // Return dreamy lilac for LumenAI page
     if (transitionProgress === 0) return currentColor;
     
     // Simple linear interpolation between colors
@@ -98,6 +117,7 @@ export default function PageBackground() {
 
   return (
     <div className="fixed inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-black" />
       <div 
         className="absolute inset-0 transition-all duration-500"
         style={{ background: gradient.background }}

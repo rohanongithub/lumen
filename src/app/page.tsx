@@ -1,9 +1,12 @@
 'use client';
 
-import { PlayIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, BackwardIcon, ForwardIcon, ArrowsPointingOutIcon, XMarkIcon, HeartIcon, UserCircleIcon } from '@heroicons/react/24/solid';
+import { PlayIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, BackwardIcon, ForwardIcon, ArrowsPointingOutIcon, XMarkIcon, HeartIcon, UserCircleIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartOutlineIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import PageBackground from '@/components/PageBackground';
+import { useTransition } from '@/components/TransitionProvider';
 
 // Define types for our data
 interface Song {
@@ -259,7 +262,13 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [isShimmering, setIsShimmering] = useState(false);
   const [likedSongs, setLikedSongs] = useState<number[]>([]);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profilePicture, setProfilePicture] = useState('');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showHopIn, setShowHopIn] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const router = useRouter();
+  const { startTransition } = useTransition();
   
   // Load liked songs from localStorage on mount
   useEffect(() => {
@@ -322,6 +331,17 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [likedSongs]);
+
+  // Load profile picture from localStorage
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile);
+      if (parsedProfile.profilePicture) {
+        setProfilePicture(parsedProfile.profilePicture);
+      }
+    }
+  }, []);
 
   // Format time in MM:SS format
   const formatTime = (seconds: number): string => {
@@ -611,14 +631,34 @@ export default function Home() {
     };
   }, [currentTrack, isPlaying, handleSkipTrack, toggleMute]);
 
+  // Add logout handler
+  const handleLogout = () => {
+    setIsProfileOpen(false);
+    setIsLoggingOut(true);
+    
+    // Show the logout message for 3 seconds, then fade out
+    setTimeout(() => {
+      setShowHopIn(true);
+    }, 3000);
+  };
+
+  const handleHopIn = () => {
+    // Keep both profile and liked songs data
+    // Use the transition provider for smooth navigation
+    startTransition(() => {
+      // Use window.location to ensure a full page reload
+      window.location.href = '/';
+    });
+  };
+
   return (
     <div>
       <div className="w-full h-auto" style={{ overflow: 'hidden', maxHeight: 'none' }}>
         <main className={`relative transition-all duration-500 ${isExpanded ? 'blur-sm' : ''}`} style={{ overflow: 'hidden' }}>
           <div className="relative z-10">
-            <div className="w-full max-w-6xl mx-auto px-4 pt-6 pb-4">
+            <div className="w-full max-w-6xl mx-auto px-4 pt-[1.25rem] pb-4">
               {/* Navigation Tabs */}
-              <div className="flex justify-between items-center mb-6 border-b border-white/10">
+              <div className="flex justify-between items-center mb-6 border-b border-white/10 mt-2">
                 <div className="flex space-x-8">
                   <button 
                     onClick={() => setActiveSection('top-picks')}
@@ -652,8 +692,52 @@ export default function Home() {
                   </button>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 flex items-center justify-center cursor-pointer">
-                    <UserCircleIcon className="w-10 h-10 text-white hover:text-white/80 transition-all duration-300" />
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="relative"
+                      >
+                        {profilePicture ? (
+                          <img
+                            src={profilePicture}
+                            alt="Profile"
+                            className="w-10 h-10 rounded-full object-cover border-2 border-gray-700"
+                          />
+                        ) : (
+                          <UserCircleIcon className="w-10 h-10 text-white/60 hover:text-white transition-colors duration-200" />
+                        )}
+                      </button>
+                      
+                      {/* Profile Dropdown Menu */}
+                      <div 
+                        className={`absolute right-0 mt-2 w-48 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 shadow-lg overflow-hidden z-50 transform transition-all duration-200 ease-out origin-top-right ${
+                          isProfileOpen 
+                            ? 'opacity-100 scale-100 translate-y-0' 
+                            : 'opacity-0 scale-95 translate-y-1 pointer-events-none'
+                        }`}
+                      >
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              setIsProfileOpen(false);
+                              router.push('/profile');
+                            }}
+                            className="flex items-center w-full px-4 py-2 text-left hover:bg-white/10 transition-colors duration-200"
+                          >
+                            <UserCircleIcon className="w-5 h-5 mr-3" />
+                            Profile
+                          </button>
+                          <button 
+                            className="flex items-center w-full px-4 py-2 text-sm text-white hover:bg-white/20 transition-colors duration-200"
+                            onClick={handleLogout}
+                          >
+                            <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -724,17 +808,18 @@ export default function Home() {
                 {/* Artist of the Day */}
                 <div>
                   <h2 className="text-3xl font-bold mb-4 text-white">Artist of the Day</h2>
-                  <div className="flex flex-col md:flex-row gap-6 items-center p-4">
-                    <div className="relative w-full md:w-1/3 aspect-square bg-white/10 rounded-xl overflow-hidden">
+                  <div className="flex flex-col md:flex-row gap-6 items-center p-4 bg-white/3 backdrop-blur-sm rounded-xl">
+                    <div className="relative w-full md:w-1/2 aspect-square bg-white/5 rounded-xl overflow-hidden shadow-xl">
                       <Image 
                         src={artistOfTheDay.image}
                         alt={artistOfTheDay.name}
                         fill
                         className="object-cover"
                         priority
+                        sizes="(max-width: 768px) 100vw, 50vw"
                       />
                     </div>
-                    <div className="w-full md:w-2/3">
+                    <div className="w-full md:w-1/2 py-4">
                       <h3 className="text-2xl font-bold mb-4 text-white">{artistOfTheDay.name}</h3>
                       <div className="mb-4">
                         <h4 className="text-lg font-semibold mb-2 text-white">Why We Love This Artist</h4>
@@ -753,13 +838,13 @@ export default function Home() {
                 {/* Trending Artists */}
                 <div className="mt-6 mb-2">
                   <h2 className="text-3xl font-bold mb-4 text-white">Trending Artists</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex flex-nowrap overflow-x-auto gap-2 hide-scrollbar">
                     {trendingArtists.map((artist) => (
                       <div 
                         key={artist.id} 
-                        className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                        className="group bg-white/3 backdrop-blur-sm rounded-xl p-2 hover:bg-white/5 transition-all duration-300 cursor-pointer flex-shrink-0 w-[160px]"
                       >
-                        <div className="aspect-square bg-white/10 rounded-lg mb-3 relative overflow-hidden">
+                        <div className="aspect-square bg-white/5 rounded-lg mb-2 relative overflow-hidden">
                           <Image
                             src={artist.image}
                             alt={artist.name}
@@ -767,10 +852,62 @@ export default function Home() {
                             className="object-cover"
                           />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-1">{artist.name}</h3>
-                        <p className="text-sm text-white/60">{artist.monthlyListeners} monthly listeners</p>
+                        <h3 className="text-lg font-bold text-white mb-1 truncate">{artist.name}</h3>
+                        <p className="text-sm text-white/60 truncate">{artist.monthlyListeners} monthly listeners</p>
                       </div>
                     ))}
+                  </div>
+                </div>
+                
+                {/* Artist Interviews */}
+                <div className="mt-6 mb-2">
+                  <h2 className="text-3xl font-bold mb-4 text-white">You may also like</h2>
+                  <div className="flex flex-nowrap overflow-x-auto gap-4 pb-4 hide-scrollbar">
+                    <div className="bg-white/3 backdrop-blur-sm rounded-xl p-4 hover:bg-white/5 transition-all duration-300 flex-shrink-0 w-full md:w-[400px]">
+                      <div className="aspect-video w-full overflow-hidden rounded-lg">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src="https://www.youtube.com/embed/T_fw3qNx1OM?si=spKs3yYgzo9JfLgL" 
+                          title="Dua Lipa Interview" 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                          referrerPolicy="strict-origin-when-cross-origin" 
+                          allowFullScreen
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                    </div>
+                    <div className="bg-white/3 backdrop-blur-sm rounded-xl p-4 hover:bg-white/5 transition-all duration-300 flex-shrink-0 w-full md:w-[400px]">
+                      <div className="aspect-video w-full overflow-hidden rounded-lg">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src="https://www.youtube.com/embed/UB1ykIbMU0E?si=2cGJBjdNfYdDg4EY" 
+                          title="Billie Eilish Interview" 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                          referrerPolicy="strict-origin-when-cross-origin" 
+                          allowFullScreen
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                    </div>
+                    <div className="bg-white/3 backdrop-blur-sm rounded-xl p-4 hover:bg-white/5 transition-all duration-300 flex-shrink-0 w-full md:w-[400px]">
+                      <div className="aspect-video w-full overflow-hidden rounded-lg">
+                        <iframe 
+                          width="100%" 
+                          height="100%" 
+                          src="https://www.youtube.com/embed/4lPD5PtqMiE?si=k0m-8SCYCo3BLnLW" 
+                          title="Taylor Swift Interview" 
+                          frameBorder="0" 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                          referrerPolicy="strict-origin-when-cross-origin" 
+                          allowFullScreen
+                          className="w-full h-full"
+                        ></iframe>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -830,7 +967,7 @@ export default function Home() {
                     : 'opacity-0 translate-y-4 invisible absolute'
                 }`}
               >
-                <div className="w-full flex items-center justify-center py-16">
+                <div className="w-full flex items-center justify-center py-16 min-h-[calc(100vh-200px)]">
                   <div className="text-center">
                     <h2 className="text-3xl font-bold mb-4 text-white">Coming Soon</h2>
                     <p className="text-white/70 text-lg">Personalized music based on your mood</p>
@@ -1089,8 +1226,62 @@ export default function Home() {
           </div>
         )}
 
+        {/* Logout Animation Screen */}
+        {isLoggingOut && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <PageBackground />
+            <div className={`text-white text-4xl font-medium ${showHopIn ? 'animate-fade-out' : 'animate-fade-in-smooth'}`}>
+              Team <span className="shadows-into-light-two">Lumen</span> will miss you
+            </div>
+            {showHopIn && (
+              <button 
+                onClick={handleHopIn}
+                className="absolute text-white text-2xl font-light bg-transparent px-8 py-4 rounded-full backdrop-blur-md transition-all duration-300 animate-fade-in-smooth border border-white/20 hover:border-white/40 hover:animate-border-shine"
+              >
+                <span className="flex items-center gap-2">
+                  Hop in!
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Add keyframes for animations */}
         <style jsx global>{`
+          @import url('https://fonts.googleapis.com/css2?family=Shadows+Into+Light+Two&display=swap');
+          
+          .shadows-into-light-two {
+            font-family: "Shadows Into Light Two", cursive;
+            font-weight: 400;
+            font-style: normal;
+          }
+
+          @keyframes shine {
+            0% {
+              background-position: 200% 0;
+            }
+            100% {
+              background-position: -100% 0;
+            }
+          }
+
+          .shining-text {
+            background: linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0) 0%,
+              rgba(255, 255, 255, 0.4) 50%,
+              rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shine 4s infinite linear;
+          }
+
           @keyframes fadeIn {
             from {
               opacity: 0;
@@ -1100,6 +1291,36 @@ export default function Home() {
               opacity: 1;
               transform: translateY(0);
             }
+          }
+
+          @keyframes fadeInSmooth {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+
+          @keyframes fadeOut {
+            from {
+              opacity: 1;
+            }
+            to {
+              opacity: 0;
+            }
+          }
+
+          .animate-fade-in {
+            animation: fadeIn 0.5s ease-out 0.3s forwards;
+          }
+
+          .animate-fade-in-smooth {
+            animation: fadeInSmooth 1s ease-in-out forwards;
+          }
+
+          .animate-fade-out {
+            animation: fadeOut 1s ease-in-out forwards;
           }
 
           @keyframes heartBounce {
@@ -1123,12 +1344,23 @@ export default function Home() {
             }
           }
 
-          .animate-fade-in {
-            animation: fadeIn 0.5s ease-out 0.3s forwards;
-          }
-
           .animate-heart-bounce {
             animation: heartBounce 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+          }
+
+          @keyframes dropdown {
+            from {
+              opacity: 0;
+              transform: scale(0.95) translateY(1px);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1) translateY(0);
+            }
+          }
+
+          .animate-dropdown {
+            animation: dropdown 0.2s ease-out forwards;
           }
           
           /* Target the JSX generated class */
@@ -1152,6 +1384,22 @@ export default function Home() {
             display: inline-block;
             padding-left: 100%;
           }
+
+          @keyframes borderShine {
+            0% {
+              border-color: rgba(255, 255, 255, 0.4);
+            }
+            50% {
+              border-color: rgba(255, 255, 255, 0.8);
+            }
+            100% {
+              border-color: rgba(255, 255, 255, 0.4);
+            }
+          }
+
+          .animate-border-shine {
+            animation: borderShine 2s infinite linear;
+          }
         `}</style>
         
         {/* Script to modify parent div */}
@@ -1168,6 +1416,21 @@ export default function Home() {
           `
         }} />
       </div>
+      
+      {/* Minimalistic Footer */}
+      <footer className="w-full py-6 mt-10">
+        <div className="w-full max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+          <div className="text-white/50 text-sm mb-4 md:mb-0">
+            © {new Date().getFullYear()} Lumen Sounds. All rights reserved.
+          </div>
+          <div className="flex gap-6">
+            <a href="#" className="text-white/50 text-sm hover:text-white transition-colors duration-300">Privacy</a>
+            <a href="#" className="text-white/50 text-sm hover:text-white transition-colors duration-300">Terms</a>
+            <a href="#" className="text-white/50 text-sm hover:text-white transition-colors duration-300">Help</a>
+            <a href="#" className="text-white/50 text-sm hover:text-white transition-colors duration-300">About</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 } 

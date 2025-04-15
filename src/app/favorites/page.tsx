@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { HeartIcon, PlayIcon, PauseIcon, BackwardIcon, ForwardIcon, SpeakerXMarkIcon, SpeakerWaveIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
+import Footer from '@/components/Footer';
 
 interface Song {
   id: number;
@@ -352,168 +353,171 @@ export default function FavoritesPage() {
   }, [currentTrack, isPlaying, handleSkipTrack, toggleMute]);
 
   return (
-    <div className="min-h-screen pt-6 px-8 pb-24">
-      <div className="max-w-5xl mx-auto mt-20">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Your Favorites</h1>
-        </div>
-        
-        {isLoading ? (
-          // Loading state
-          <div className="flex justify-center items-center h-60">
-            <div className="flex items-center space-x-3">
-              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
-              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
-              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
-            </div>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1">
+        <div className="max-w-5xl pl-40 mt-12">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white">Your Favorites</h1>
           </div>
-        ) : favorites.length > 0 ? (
-          // Display favorites grid
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {favorites.map((item) => (
-              <div key={item.id} className="group">
-                <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
-                  <Image
-                    src={'image' in item ? item.image : (item.poster || '/images/electric.jpg')}
-                    alt={item.title}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          {isLoading ? (
+            // Loading state
+            <div className="flex justify-center items-center h-60">
+              <div className="flex items-center space-x-3">
+                <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
+                <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
+              </div>
+            </div>
+          ) : favorites.length > 0 ? (
+            // Display favorites grid
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {favorites.map((item) => (
+                <div key={item.id} className="group">
+                  <div className="relative aspect-square rounded-lg overflow-hidden mb-3">
+                    <Image
+                      src={'image' in item ? item.image : (item.poster || '/images/electric.jpg')}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Play/Pause Button Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button 
+                        onClick={() => handlePlayPause(item)}
+                        className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-all duration-300 cursor-pointer"
+                      >
+                        {currentTrack?.id === item.id && isPlaying ? (
+                          <PauseIcon className="w-6 h-6 text-white" />
+                        ) : (
+                          <PlayIcon className="w-6 h-6 text-white" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
                   
-                  {/* Play/Pause Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={() => handlePlayPause(item)}
-                      className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-all duration-300 cursor-pointer"
-                    >
-                      {currentTrack?.id === item.id && isPlaying ? (
-                        <PauseIcon className="w-6 h-6 text-white" />
-                      ) : (
-                        <PlayIcon className="w-6 h-6 text-white" />
-                      )}
-                    </button>
+                  <h3 className="font-medium text-white text-sm">{item.title}</h3>
+                  <p className="text-white/60 text-xs mt-1">{item.artist}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Empty state
+            <div className="bg-white/5 rounded-2xl p-10 text-center">
+              <div className="mx-auto w-16 h-16 mb-6 text-white/30">
+                <HeartIcon className="w-full h-full" />
+              </div>
+              <h2 className="text-xl font-medium text-white/90 mb-2">No favorites yet</h2>
+              <p className="text-white/60 max-w-md mx-auto">
+                Add favorites from the home page by clicking the heart icon on songs you love.
+                They'll all appear here for easy access.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Audio Player */}
+        {currentTrack && (
+          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
+            <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
+              {/* Background Image */}
+              {currentTrack.poster && (
+                <div className="absolute inset-0 -z-10 transition-opacity duration-500 opacity-[0.15]">
+                  <Image
+                    src={currentTrack.poster}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+                </div>
+              )}
+
+              {/* Progress Bar */}
+              <div 
+                className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
+                onMouseDown={handleProgressMouseDown}
+                onMouseMove={handleProgressMouseMove}
+                onMouseUp={handleProgressMouseUp}
+                onClick={handleProgressClick}
+                style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
+              >
+                <div 
+                  className="h-full bg-white/70 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+                <div 
+                  className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full transition-opacity duration-300 ${
+                    isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                  style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
+                ></div>
+              </div>
+              
+              {/* Controls */}
+              <div className="flex items-center justify-between relative z-10">
+                {/* Track Info */}
+                <div className="flex-1">
+                  <p className="text-white text-sm font-medium">{currentTrack.title}</p>
+                  <p className="text-white/60 text-xs">{currentTrack.artist}</p>
+                </div>
+                
+                {/* Playback Controls */}
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                    onClick={() => handleSkipTrack('backward')}
+                  >
+                    <BackwardIcon className="w-4 h-4" />
+                  </div>
+                  
+                  <div 
+                    className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all duration-300"
+                    onClick={() => handlePlayPause(currentTrack)}
+                  >
+                    {isPlaying ? (
+                      <PauseIcon className="w-4 h-4 text-white" />
+                    ) : (
+                      <PlayIcon className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                  
+                  <div 
+                    className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                    onClick={() => handleSkipTrack('forward')}
+                  >
+                    <ForwardIcon className="w-4 h-4" />
                   </div>
                 </div>
                 
-                <h3 className="font-medium text-white text-sm">{item.title}</h3>
-                <p className="text-white/60 text-xs mt-1">{item.artist}</p>
+                {/* Right Controls */}
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                  <button 
+                    className="p-2 text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/10"
+                    onClick={toggleMute}
+                  >
+                    {isMuted ? (
+                      <SpeakerXMarkIcon className="w-4 h-4" />
+                    ) : (
+                      <SpeakerWaveIcon className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          // Empty state
-          <div className="bg-white/5 rounded-2xl p-10 text-center">
-            <div className="mx-auto w-16 h-16 mb-6 text-white/30">
-              <HeartIcon className="w-full h-full" />
+              
+              {/* Time Display */}
+              <div className="flex justify-between text-xs text-white/50 mt-2 relative z-10">
+                <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
+                <span>{formatTime(audioRef.current?.duration || 0)}</span>
+              </div>
             </div>
-            <h2 className="text-xl font-medium text-white/90 mb-2">No favorites yet</h2>
-            <p className="text-white/60 max-w-md mx-auto">
-              Add favorites from the home page by clicking the heart icon on songs you love.
-              They'll all appear here for easy access.
-            </p>
           </div>
         )}
       </div>
-
-      {/* Audio Player */}
-      {currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
-          <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
-            {/* Background Image */}
-            {currentTrack.poster && (
-              <div className="absolute inset-0 -z-10 transition-opacity duration-500 opacity-[0.15]">
-                <Image
-                  src={currentTrack.poster}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-              </div>
-            )}
-
-            {/* Progress Bar */}
-            <div 
-              className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
-              onMouseDown={handleProgressMouseDown}
-              onMouseMove={handleProgressMouseMove}
-              onMouseUp={handleProgressMouseUp}
-              onClick={handleProgressClick}
-              style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
-            >
-              <div 
-                className="h-full bg-white/70 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-              <div 
-                className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full transition-opacity duration-300 ${
-                  isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                }`}
-                style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
-              ></div>
-            </div>
-            
-            {/* Controls */}
-            <div className="flex items-center justify-between relative z-10">
-              {/* Track Info */}
-              <div className="flex-1">
-                <p className="text-white text-sm font-medium">{currentTrack.title}</p>
-                <p className="text-white/60 text-xs">{currentTrack.artist}</p>
-              </div>
-              
-              {/* Playback Controls */}
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
-                  onClick={() => handleSkipTrack('backward')}
-                >
-                  <BackwardIcon className="w-4 h-4" />
-                </div>
-                
-                <div 
-                  className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all duration-300"
-                  onClick={() => handlePlayPause(currentTrack)}
-                >
-                  {isPlaying ? (
-                    <PauseIcon className="w-4 h-4 text-white" />
-                  ) : (
-                    <PlayIcon className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                
-                <div 
-                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
-                  onClick={() => handleSkipTrack('forward')}
-                >
-                  <ForwardIcon className="w-4 h-4" />
-                </div>
-              </div>
-              
-              {/* Right Controls */}
-              <div className="flex items-center gap-2 flex-1 justify-end">
-                <button 
-                  className="p-2 text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/10"
-                  onClick={toggleMute}
-                >
-                  {isMuted ? (
-                    <SpeakerXMarkIcon className="w-4 h-4" />
-                  ) : (
-                    <SpeakerWaveIcon className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-            
-            {/* Time Display */}
-            <div className="flex justify-between text-xs text-white/50 mt-2 relative z-10">
-              <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
-              <span>{formatTime(audioRef.current?.duration || 0)}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <Footer />
     </div>
   );
 } 

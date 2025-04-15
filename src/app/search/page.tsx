@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { PlayIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, BackwardIcon, ForwardIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, XMarkIcon, PlayIcon, PauseIcon, SpeakerWaveIcon, SpeakerXMarkIcon, BackwardIcon, ForwardIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTransition } from '@/components/TransitionProvider';
+import Footer from '@/components/Footer';
 
 // Define types for our data
 interface Album {
@@ -414,275 +414,236 @@ export default function SearchPage() {
     }
   };
 
-  // Add keyboard event listener for playback control
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      // Only process keyboard shortcuts if we have a track playing or loaded
-      if (!currentTrack) return;
-      
-      switch (event.code) {
-        case 'Space':
-          event.preventDefault(); // Prevent page scroll
-          if (isPlaying) {
-            audioRef.current?.pause();
-          } else {
-            audioRef.current?.play().catch(error => {
-              console.error('Error playing audio:', error);
-            });
-          }
-          setIsPlaying(!isPlaying);
-          break;
-          
-        case 'ArrowRight':
-          event.preventDefault();
-          handleSkipTrack('forward');
-          break;
-          
-        case 'ArrowLeft':
-          event.preventDefault();
-          handleSkipTrack('backward');
-          break;
-          
-        case 'KeyM':
-          event.preventDefault();
-          toggleMute();
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [currentTrack, isPlaying, handleSkipTrack, toggleMute]);
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center">
-      {/* Centered Translucent Search Bar */}
-      <div className="w-full max-w-lg px-4 mt-32 mb-8">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
-            <MagnifyingGlassIcon className="h-5 w-5 text-white/70" />
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
-            placeholder="Vibe check..."
-            className="w-full h-14 pl-12 pr-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 focus:border-amber-400/50 focus:ring-2 focus:ring-amber-400/30 text-white placeholder-white/50 focus:outline-none transition-all duration-300 shadow-lg relative z-0"
-            autoFocus
-          />
-          {searchQuery && (
-            <button 
-              onClick={clearSearch}
-              className="absolute inset-y-0 right-0 pr-5 flex items-center"
-            >
-              <XMarkIcon className="h-5 w-5 text-white/60 hover:text-white" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Random Quote (shown only when no search is active) */}
-      {!isLoading && searchQuery.trim() === '' && (
-        <div 
-          className={`text-center px-6 mt-12 mb-16 max-w-lg transform transition-all duration-1000 ease-in-out ${
-            showQuote 
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-10'
-          }`}
-        >
-          <p className="text-white/80 text-lg italic">"{randomQuote.quote}"</p>
-          <p className={`text-white/60 text-sm mt-2 transition-opacity duration-1000 delay-500 ${
-            showQuote ? 'opacity-100' : 'opacity-0'
-          }`}>
-            — {randomQuote.author}
-          </p>
-        </div>
-      )}
-
-      {/* Loading Indicator */}
-      {isLoading && searchQuery.trim() !== '' && (
-        <div className="w-full max-w-2xl px-6 mb-6 flex justify-center">
-          <div className="flex items-center space-x-3">
-            <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
-            <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
-            <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
-          </div>
-        </div>
-      )}
-
-      {/* Search Results Grid */}
-      {!isLoading && searchResults.length > 0 && (
-        <div className="w-full max-w-2xl px-6">
-          <div className="grid grid-cols-3 gap-6">
-            {searchResults.map((album, index) => (
-              <div 
-                key={album.id} 
-                className={`flex flex-col transform transition-all duration-500 ${
-                  showResults 
-                    ? 'translate-y-0 opacity-100' 
-                    : 'translate-y-8 opacity-0'
-                }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
+    <div>
+      <div className="min-h-screen w-full flex flex-col items-center">
+        {/* Centered Translucent Search Bar */}
+        <div className="w-full max-w-lg px-4 mt-32 mb-8">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none z-10">
+              <MagnifyingGlassIcon className="h-5 w-5 text-white/70" />
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Vibe check..."
+              className="w-full h-14 pl-12 pr-12 rounded-full backdrop-blur-xl bg-white/10 border border-white/20 focus:border-amber-400/50 focus:ring-2 focus:ring-amber-400/30 text-white placeholder-white/50 focus:outline-none transition-all duration-300 shadow-lg relative z-0"
+              autoFocus
+            />
+            {searchQuery && (
+              <button 
+                onClick={clearSearch}
+                className="absolute inset-y-0 right-0 pr-5 flex items-center"
               >
-                <div className="aspect-square relative rounded-lg overflow-hidden mb-2 group">
+                <XMarkIcon className="h-5 w-5 text-white/60 hover:text-white" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Random Quote (shown only when no search is active) */}
+        {!isLoading && searchQuery.trim() === '' && (
+          <div 
+            className={`text-center px-6 mt-12 mb-16 max-w-lg transform transition-all duration-1000 ease-in-out ${
+              showQuote 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-10'
+            }`}
+          >
+            <p className="text-white/80 text-lg italic">"{randomQuote.quote}"</p>
+            <p className={`text-white/60 text-sm mt-2 transition-opacity duration-1000 delay-500 ${
+              showQuote ? 'opacity-100' : 'opacity-0'
+            }`}>
+              — {randomQuote.author}
+            </p>
+          </div>
+        )}
+
+        {/* Loading Indicator */}
+        {isLoading && searchQuery.trim() !== '' && (
+          <div className="w-full max-w-2xl px-6 mb-6 flex justify-center">
+            <div className="flex items-center space-x-3">
+              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
+              <div className="h-2 w-2 bg-white/70 rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Results Grid */}
+        {!isLoading && searchResults.length > 0 && (
+          <div className="w-full max-w-2xl px-6">
+            <div className="grid grid-cols-3 gap-6">
+              {searchResults.map((album, index) => (
+                <div 
+                  key={album.id} 
+                  className={`flex flex-col transform transition-all duration-500 ${
+                    showResults 
+                      ? 'translate-y-0 opacity-100' 
+                      : 'translate-y-8 opacity-0'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <div className="aspect-square relative rounded-lg overflow-hidden mb-2 group">
+                    <Image
+                      src={album.image}
+                      alt={album.title}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Play/Pause Button Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button 
+                        onClick={() => handlePlayPause(album)}
+                        className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-all duration-300 cursor-pointer"
+                      >
+                        {currentTrack?.id === album.id && isPlaying ? (
+                          <PauseIcon className="w-6 h-6 text-white" />
+                        ) : (
+                          <PlayIcon className="w-6 h-6 text-white" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-medium text-white line-clamp-1">{album.title}</h3>
+                  <p className="text-xs text-white/60 line-clamp-1">{album.artist}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Results Message */}
+        {!isLoading && searchQuery.trim() !== '' && searchResults.length === 0 && (
+          <div className={`text-center text-white/60 mt-8 transition-opacity duration-300 ${
+            showResults ? 'opacity-100' : 'opacity-0'
+          }`}>
+            No matching albums found
+          </div>
+        )}
+
+        {/* Audio Player */}
+        {currentTrack && (
+          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
+            <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
+              {/* Background Image */}
+              {currentTrack.poster && (
+                <div className="absolute inset-0 -z-10 transition-opacity duration-500 opacity-[0.15]">
                   <Image
-                    src={album.image}
-                    alt={album.title}
+                    src={currentTrack.poster}
+                    alt=""
                     fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+                </div>
+              )}
+
+              {/* Progress Bar */}
+              <div 
+                className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
+                onMouseDown={handleProgressMouseDown}
+                onMouseMove={handleProgressMouseMove}
+                onMouseUp={handleProgressMouseUp}
+                onClick={handleProgressClick}
+                style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
+              >
+                <div 
+                  className="h-full bg-white/70 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                ></div>
+                <div 
+                  className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full transition-opacity duration-300 ${
+                    isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                  style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
+                ></div>
+              </div>
+              
+              {/* Controls */}
+              <div className="flex items-center justify-between relative z-10">
+                {/* Track Info */}
+                <div className="flex-1">
+                  <p className="text-white text-sm font-medium">{currentTrack.title}</p>
+                  <p className="text-white/60 text-xs">{currentTrack.artist}</p>
+                </div>
+                
+                {/* Playback Controls */}
+                <div className="flex items-center gap-4">
+                  <div 
+                    className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                    onClick={() => handleSkipTrack('backward')}
+                  >
+                    <BackwardIcon className="w-4 h-4" />
+                  </div>
                   
-                  {/* Play/Pause Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={() => handlePlayPause(album)}
-                      className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-all duration-300 cursor-pointer"
-                    >
-                      {currentTrack?.id === album.id && isPlaying ? (
-                        <PauseIcon className="w-6 h-6 text-white" />
-                      ) : (
-                        <PlayIcon className="w-6 h-6 text-white" />
-                      )}
-                    </button>
+                  <div 
+                    className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all duration-300"
+                    onClick={() => handlePlayPause(currentTrack)}
+                  >
+                    {isPlaying ? (
+                      <PauseIcon className="w-4 h-4 text-white" />
+                    ) : (
+                      <PlayIcon className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                  
+                  <div 
+                    className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
+                    onClick={() => handleSkipTrack('forward')}
+                  >
+                    <ForwardIcon className="w-4 h-4" />
                   </div>
                 </div>
-                <h3 className="text-sm font-medium text-white line-clamp-1">{album.title}</h3>
-                <p className="text-xs text-white/60 line-clamp-1">{album.artist}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* No Results Message */}
-      {!isLoading && searchQuery.trim() !== '' && searchResults.length === 0 && (
-        <div className={`text-center text-white/60 mt-8 transition-opacity duration-300 ${
-          showResults ? 'opacity-100' : 'opacity-0'
-        }`}>
-          No matching albums found
-        </div>
-      )}
-
-      {/* Audio Player */}
-      {currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
-          <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
-            {/* Background Image */}
-            {currentTrack.poster && (
-              <div className="absolute inset-0 -z-10 transition-opacity duration-500 opacity-[0.15]">
-                <Image
-                  src={currentTrack.poster}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-              </div>
-            )}
-
-            {/* Progress Bar */}
-            <div 
-              className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
-              onMouseDown={handleProgressMouseDown}
-              onMouseMove={handleProgressMouseMove}
-              onMouseUp={handleProgressMouseUp}
-              onClick={handleProgressClick}
-              style={{ cursor: isDragging ? 'grabbing' : 'pointer' }}
-            >
-              <div 
-                className="h-full bg-white/70 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-              <div 
-                className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full transition-opacity duration-300 ${
-                  isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                }`}
-                style={{ left: `${progress}%`, transform: 'translate(-50%, -50%)' }}
-              ></div>
-            </div>
-            
-            {/* Controls */}
-            <div className="flex items-center justify-between relative z-10">
-              {/* Track Info */}
-              <div className="flex-1">
-                <p className="text-white text-sm font-medium">{currentTrack.title}</p>
-                <p className="text-white/60 text-xs">{currentTrack.artist}</p>
-              </div>
-              
-              {/* Playback Controls */}
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
-                  onClick={() => handleSkipTrack('backward')}
-                >
-                  <BackwardIcon className="w-4 h-4" />
-                </div>
                 
-                <div 
-                  className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all duration-300"
-                  onClick={() => handlePlayPause(currentTrack)}
-                >
-                  {isPlaying ? (
-                    <PauseIcon className="w-4 h-4 text-white" />
-                  ) : (
-                    <PlayIcon className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                
-                <div 
-                  className="w-8 h-8 flex items-center justify-center cursor-pointer text-white/60 hover:text-white transition-all duration-300"
-                  onClick={() => handleSkipTrack('forward')}
-                >
-                  <ForwardIcon className="w-4 h-4" />
+                {/* Right Controls */}
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                  <button 
+                    className="p-2 text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/10"
+                    onClick={toggleMute}
+                  >
+                    {isMuted ? (
+                      <SpeakerXMarkIcon className="w-4 h-4" />
+                    ) : (
+                      <SpeakerWaveIcon className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
               
-              {/* Right Controls */}
-              <div className="flex items-center gap-2 flex-1 justify-end">
-                <button 
-                  className="p-2 text-white/60 hover:text-white transition-colors rounded-full hover:bg-white/10"
-                  onClick={toggleMute}
-                >
-                  {isMuted ? (
-                    <SpeakerXMarkIcon className="w-4 h-4" />
-                  ) : (
-                    <SpeakerWaveIcon className="w-4 h-4" />
-                  )}
-                </button>
+              {/* Time Display */}
+              <div className="flex justify-between text-xs text-white/50 mt-2 relative z-10">
+                <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
+                <span>{formatTime(audioRef.current?.duration || 0)}</span>
               </div>
             </div>
-            
-            {/* Time Display */}
-            <div className="flex justify-between text-xs text-white/50 mt-2 relative z-10">
-              <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
-              <span>{formatTime(audioRef.current?.duration || 0)}</span>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Add keyframes for animations */}
-      <style jsx global>{`
-        @keyframes goldenGlow {
-          0% {
-            box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+        {/* Add keyframes for animations */}
+        <style jsx global>{`
+          @keyframes goldenGlow {
+            0% {
+              box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+              box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+            }
+            100% {
+              box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
+            }
           }
-          50% {
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
-          }
-          100% {
-            box-shadow: 0 0 5px rgba(245, 158, 11, 0.3);
-          }
-        }
 
-        input:focus {
-          animation: goldenGlow 2s ease-in-out infinite;
-        }
-      `}</style>
+          input:focus {
+            animation: goldenGlow 2s ease-in-out infinite;
+          }
+        `}</style>
+      </div>
+      <Footer />
     </div>
   );
 } 
