@@ -128,7 +128,22 @@ const musicQuotes = [
   { quote: "If music be the food of love, play on.", author: "William Shakespeare" },
   { quote: "Music is what feelings sound like.", author: "Anonymous" },
   { quote: "The only proof he needed for the existence of God was music.", author: "Kurt Vonnegut" },
-  { quote: "Ah, music. A magic beyond all we do here!", author: "J.K. Rowling" }
+  { quote: "Ah, music. A magic beyond all we do here!", author: "J.K. Rowling" },
+  { quote: "In a world filled with hate, we must still dare to hope.", author: "Michael Jackson" },
+  { quote: "If you want to make the world a better place, take a look at yourself and make a change.", author: "Michael Jackson" },
+  { quote: "I just hope I made you proud. That's all I ever wanted.", author: "Michael Jackson" },
+  { quote: "My life has been a tapestry of rich and royal hue.", author: "Carole King" },
+  { quote: "I've had good times and bad times and times when my race was run.", author: "Elvis Presley" },
+  { quote: "Life is what happens to you while you're busy making other plans.", author: "John Lennon" },
+  { quote: "I'm not afraid of anything. The words 'fear' and 'afraid' are not in my vocabulary.", author: "Dolly Parton" },
+  { quote: "What hurts the most is being so close and having so much to say and watching you walk away.", author: "Rascal Flatts" },
+  { quote: "God blessed the broken road that led me straight to you.", author: "Rascal Flatts" },
+  { quote: "I've been searchin' deep down in my soul, words that I'm hearin' are starting to get old.", author: "Rascal Flatts" },
+  { quote: "Music has been my outlet, my gift to all of the lovers in this world.", author: "Freddie Mercury" },
+  { quote: "We've got to all come together, and we've got to help each other, so we can be free.", author: "Stevie Wonder" },
+  { quote: "Before we criticize a man, walk a mile in his shoes.", author: "Johnny Cash" },
+  { quote: "You can't change the world but you can change yourself.", author: "Diana Ross" },
+  { quote: "Yesterday, all my troubles seemed so far away.", author: "The Beatles" }
 ];
 
 export default function SearchPage() {
@@ -528,7 +543,7 @@ export default function SearchPage() {
 
         {/* Audio Player */}
         {currentTrack && (
-          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
+          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-[65] m-0 p-0 md:pb-0 pb-16">
             <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
               {/* Background Image */}
               {currentTrack.poster && (

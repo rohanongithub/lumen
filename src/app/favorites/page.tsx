@@ -355,7 +355,7 @@ export default function FavoritesPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1">
-        <div className="max-w-5xl pl-40 mt-12">
+        <div className="max-w-5xl mx-auto px-4 md:pl-40 md:pr-4 mt-12">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white">Your Favorites</h1>
@@ -421,7 +421,7 @@ export default function FavoritesPage() {
 
         {/* Audio Player */}
         {currentTrack && (
-          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-50 m-0 p-0">
+          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-[65] m-0 p-0 md:pb-0 pb-16">
             <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
               {/* Background Image */}
               {currentTrack.poster && (

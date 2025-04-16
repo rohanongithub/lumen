@@ -236,6 +236,7 @@ export default function CommunityPage() {
   const [replyContent, setReplyContent] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
@@ -318,11 +319,11 @@ export default function CommunityPage() {
   const getCardSizeClasses = (size: Comment['size']) => {
     switch (size) {
       case 'small':
-        return 'md:col-span-1 h-64';
+        return 'lg:col-span-1 h-64';
       case 'medium':
-        return 'md:col-span-2 h-64';
+        return 'lg:col-span-2 h-64';
       case 'large':
-        return 'md:col-span-3 h-64';
+        return 'lg:col-span-3 sm:col-span-2 h-64';
       default:
         return '';
     }
@@ -383,9 +384,18 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto pl-20 flex gap-8">
+        {/* Audio Player */}
+        {currentTrack && (
+          <div className="fixed bottom-0 left-0 right-0 flex justify-center z-[65] m-0 p-0 md:pb-0 pb-16">
+            <div className="relative bg-white/10 backdrop-blur-md rounded-t-xl border-t border-white/20 w-full max-w-md shadow-[0_-10px_30px_rgba(0,0,0,0.3)] overflow-hidden p-4">
+              {/* Audio player content */}
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-7xl mx-auto px-4 sm:pl-20 lg:pl-20 md:pr-4 flex flex-col lg:flex-row gap-8">
           <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {comments.map((comment) => (
                 <div 
                   key={comment.id} 
@@ -487,8 +497,8 @@ export default function CommunityPage() {
           </div>
           
           {/* Friends Panel */}
-          <div className="w-80 hidden lg:block">
-            <div className="bg-white/3 backdrop-blur-sm rounded-xl p-6 border border-white/5 sticky top-24">
+          <div className="w-full lg:w-80 mt-8 lg:mt-0">
+            <div className="bg-white/3 backdrop-blur-sm rounded-xl p-6 border border-white/5 lg:sticky lg:top-24">
               <h2 className="text-xl font-bold text-white mb-6">Friends Activity</h2>
               <div className="space-y-6">
                 {friendsList.map((friend) => (
@@ -511,7 +521,7 @@ export default function CommunityPage() {
                 ))}
               </div>
 
-              {/* Personal Note Card */}
+              {/* Personal Note Card - Show on larger screens and at bottom on mobile */}
               <div className="mt-8 bg-white/3 backdrop-blur-sm rounded-xl p-4 border border-white/5">
                 <h3 className="text-lg font-medium text-white mb-3">Leave a Note</h3>
                 <div className="flex items-start space-x-4">

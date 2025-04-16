@@ -73,6 +73,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { startTransition } = useTransition();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Custom link handler with transition
   const handleNavigation = (href: string, e: React.MouseEvent) => {
@@ -85,6 +86,9 @@ export default function Navbar() {
     startTransition(() => {
       router.push(href);
     });
+
+    // Close mobile menu if open
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -120,20 +124,114 @@ export default function Navbar() {
           50% { background-position: 100% 50% }
           100% { background-position: 0% 50% }
         }
+
+        /* Mobile navbar styles */
+        @media (max-width: 1040px) {
+          .mobile-navbar {
+            left: 0;
+            bottom: 0;
+            top: auto;
+            width: 100%;
+            padding: 0;
+            height: 65px; /* Fixed height for the navbar */
+          }
+
+          .mobile-navbar-content {
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center; /* Ensure vertical centering */
+            width: 100%;
+            padding: 10px 5px;
+            background-color: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0;
+            height: 100%;
+          }
+
+          /* Remove body padding, we're handling this in each player component */
+          body {
+            padding-bottom: 0;
+          }
+
+          .mobile-nav-logo {
+            display: none;
+          }
+
+          /* Mobile floating logo styles */
+          .mobile-floating-logo {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background-color: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.5rem;
+            border-radius: 100px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          /* Only modify nav items in mobile view */
+          .mobile-navbar .mobile-nav-items {
+            flex-direction: row !important;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            gap: 0;
+            height: 100%; /* Full height */
+            /* Override space-y class only in mobile view */
+            --tw-space-y-reverse: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+
+          /* Completely disable spacing in mobile view */
+          .mobile-navbar .mobile-nav-items > * + * {
+            margin-top: 0 !important;
+            --tw-space-y-reverse: 0 !important;
+          }
+
+          /* Target nav items directly but only in mobile navbar */
+          .mobile-navbar .mobile-nav-items a {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+          }
+
+          /* Target all icons in the mobile navbar to ensure consistent alignment */
+          .mobile-navbar .mobile-nav-items a svg {
+            margin-top: 0;
+            position: relative;
+            top: 0;
+          }
+
+          .mobile-nav-tooltip {
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: auto;
+          }
+        }
       `}</style>
 
-      <div className="fixed left-6 top-4 flex flex-col z-50">
+      <div className={`fixed left-6 top-4 flex flex-col z-[70] mobile-navbar`}>
         {/* Navigation Container */}
         <nav 
-          className="p-4" 
+          className="p-4 mobile-navbar-content" 
           aria-label="Main navigation"
         >
           {/* Logo inside nav container */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 text-center mobile-nav-logo">
             <h1 className="text-2xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
           </div>
           
-          <div className="space-y-6 flex flex-col items-center">
+          <div className="space-y-6 flex flex-col items-center mobile-nav-items">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -152,7 +250,7 @@ export default function Navbar() {
                 >
                   <Icon className="w-6 h-6" aria-hidden="true" />
                   <span className="sr-only">{item.name}</span>
-                  <span className="absolute left-12 bg-black/70 text-white text-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  <span className="absolute left-12 bg-black/70 text-white text-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap mobile-nav-tooltip">
                     {item.name}
                   </span>
                 </a>
@@ -160,6 +258,17 @@ export default function Navbar() {
             })}
           </div>
         </nav>
+      </div>
+
+      {/* Floating logo for mobile */}
+      <div className="block md:hidden mobile-floating-logo">
+        <a 
+          href="/"
+          onClick={(e) => handleNavigation('/', e)}
+          className="flex items-center justify-center"
+        >
+          <h1 className="text-xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
+        </a>
       </div>
     </>
   );
