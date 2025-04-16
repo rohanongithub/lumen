@@ -257,53 +257,48 @@ export default function SearchPage() {
       return;
     }
 
-    // Ensure we're using the correct track data
-    const trackToPlay = {
-      ...album,
-      poster: album.poster || album.image, // Use poster if available, fallback to image
-      title: album.title,
-      artist: album.artist,
-      audioFile: album.audioFile
-    };
-
     if (currentTrack?.id === album.id) {
-      if (isPlaying) {
-        audioRef.current?.pause();
-      } else {
-        audioRef.current?.play();
-      }
-      setIsPlaying(!isPlaying);
-    } else {
-      if (audioRef.current) {
+      if (isPlaying && audioRef.current) {
         audioRef.current.pause();
+        setIsPlaying(false);
+      } else if (audioRef.current) {
+        audioRef.current.play().catch(error => {
+          console.error('Error playing audio:', error);
+        });
+        setIsPlaying(true);
       }
-      setCurrentTrack(trackToPlay);
+    } else {
+      setCurrentTrack(album);
       setIsPlaying(true);
-      
-      // Create new audio element
-      const audio = new Audio(trackToPlay.audioFile);
-      audioRef.current = audio;
-      
-      // Add error handling
-      audio.onerror = (e) => {
-        console.error('Error playing audio:', e);
-        setIsPlaying(false);
-        setCurrentTrack(null);
-      };
-      
-      // Add ended event handler
-      audio.onended = () => {
-        setIsPlaying(false);
-        setCurrentTrack(null);
-      };
-      
-      audio.play().catch(error => {
-        console.error('Error playing audio:', error);
-        setIsPlaying(false);
-        setCurrentTrack(null);
-      });
     }
   };
+
+  // Handle track changes and auto-play
+  useEffect(() => {
+    if (currentTrack?.audioFile && audioRef.current) {
+      // Only set the source if it's a new track or first load
+      if (!audioRef.current.src || !audioRef.current.src.endsWith(currentTrack.audioFile)) {
+        audioRef.current.src = currentTrack.audioFile;
+        audioRef.current.volume = volume;
+        
+        // Auto-play when track changes
+        if (isPlaying) {
+          audioRef.current.play().catch(error => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+          });
+        }
+      }
+    }
+  }, [currentTrack]);
+  
+  // Handle volume and mute changes separately
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+    }
+  }, [volume, isMuted]);
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -394,14 +389,7 @@ export default function SearchPage() {
 
   // Handle mute toggle
   const toggleMute = () => {
-    if (audioRef.current) {
-      if (isMuted) {
-        audioRef.current.volume = volume;
-      } else {
-        audioRef.current.volume = 0;
-      }
-      setIsMuted(!isMuted);
-    }
+    setIsMuted(!isMuted);
   };
 
   // Handle forward/backward navigation
@@ -560,7 +548,7 @@ export default function SearchPage() {
 
               {/* Progress Bar */}
               <div 
-                className="w-full h-1 bg-white/20 rounded-full mb-3 relative group"
+                className="w-full h-1 bg-white/20 rounded-full mb-3 cursor-pointer relative group"
                 onMouseDown={handleProgressMouseDown}
                 onMouseMove={handleProgressMouseMove}
                 onMouseUp={handleProgressMouseUp}
@@ -635,6 +623,27 @@ export default function SearchPage() {
                 <span>{formatTime(audioRef.current?.currentTime || 0)}</span>
                 <span>{formatTime(audioRef.current?.duration || 0)}</span>
               </div>
+
+              {/* Hidden audio element for playback */}
+              <audio 
+                ref={audioRef} 
+                style={{ display: 'none' }} 
+                preload="auto"
+                onTimeUpdate={() => {
+                  if (audioRef.current) {
+                    const percent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+                    setProgress(percent);
+                  }
+                }}
+                onEnded={() => {
+                  console.log('Track ended');
+                  setIsPlaying(false);
+                }}
+                onError={(e) => {
+                  console.error('Audio error:', e);
+                  setIsPlaying(false);
+                }}
+              />
             </div>
           </div>
         )}

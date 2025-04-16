@@ -375,50 +375,35 @@ export default function Home() {
       if (isPlaying && audioRef.current) {
         console.log('Pausing current track');
         audioRef.current.pause();
+        setIsPlaying(false);
       } else if (audioRef.current) {
         console.log('Resuming current track');
         audioRef.current.play().catch(error => {
           console.error('Error playing audio:', error);
         });
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     } else {
       // If a different track is clicked, play it
       console.log('Setting new track:', track.title);
       setCurrentTrack(track);
-      setIsPlaying(true);
       
-      // Set up the audio element
-      if (audioRef.current && track.audioFile) {
-        console.log('Setting audio source to:', track.audioFile);
-        audioRef.current.src = track.audioFile;
-        audioRef.current.volume = volume;
-        audioRef.current.muted = isMuted;
-        
-        // Add event listeners for debugging
-        audioRef.current.addEventListener('canplaythrough', () => {
-          console.log('Audio can play through');
-        });
-        
-        audioRef.current.addEventListener('error', (e) => {
-          console.error('Audio error:', e);
-        });
-        
-        audioRef.current.play().catch(error => {
-          console.error('Error playing audio:', error);
-        });
+      // The audio element will be updated after the state changes and component rerenders
+      // We need to handle this in a useEffect
+      if (track.audioFile) {
+        console.log('Audio will be set to:', track.audioFile);
+        // We'll set isPlaying to true, but the actual play will happen in useEffect
+        setIsPlaying(true);
       } else {
-        console.error('Audio element or track.audioFile is missing');
+        console.error('Track has no audio file');
+        setIsPlaying(false);
       }
     }
   };
   
   // Handle volume changes
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    setIsMuted(!isMuted);
   };
   
   // Update volume when changed
@@ -432,12 +417,9 @@ export default function Home() {
   
   // Initialize audio element
   useEffect(() => {
-    // Create a new audio element if it doesn't exist
-    if (!audioRef.current) {
-      console.log('Creating new audio element');
-      audioRef.current = new Audio();
-      audioRef.current.preload = 'auto';
-    }
+    // We'll now rely on the DOM audio element instead of creating one
+    // This will ensure the controls always work properly
+    // The audioRef.current will be automatically connected when the element renders
     
     return () => {
       // Clean up
@@ -467,25 +449,26 @@ export default function Home() {
     }
   }, []);
   
-  // Update progress bar
+  // Update progress bar whenever audio is playing
   useEffect(() => {
-    if (audioRef.current && isPlaying) {
-      const updateProgress = () => {
-        if (audioRef.current) {
-          const percent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-          setProgress(percent);
-        }
-      };
-      
+    const updateProgress = () => {
+      if (audioRef.current) {
+        const percent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+        setProgress(percent);
+      }
+    };
+    
+    // Add event listener for timeupdate
+    if (audioRef.current) {
       audioRef.current.addEventListener('timeupdate', updateProgress);
-      
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.removeEventListener('timeupdate', updateProgress);
-        }
-      };
     }
-  }, [isPlaying]);
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', updateProgress);
+      }
+    };
+  }, [audioRef.current]);
   
   // Handle progress bar click
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -668,6 +651,34 @@ export default function Home() {
   const handleOnboardingClose = () => {
     setShowOnboarding(false);
   };
+
+  // Handle track changes and auto-play
+  useEffect(() => {
+    if (currentTrack?.audioFile && audioRef.current) {
+      // Only set the source if it's a new track or first load
+      if (!audioRef.current.src || !audioRef.current.src.endsWith(currentTrack.audioFile)) {
+        console.log('Setting audio source to:', currentTrack.audioFile);
+        audioRef.current.src = currentTrack.audioFile;
+        audioRef.current.volume = volume;
+        
+        // Auto-play when track changes
+        if (isPlaying) {
+          audioRef.current.play().catch(error => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+          });
+        }
+      }
+    }
+  }, [currentTrack]);
+  
+  // Handle volume and mute changes separately
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+    }
+  }, [volume, isMuted]);
 
   return (
     <main className="min-h-screen">
@@ -1045,7 +1056,7 @@ export default function Home() {
                       </div>
 
                       {/* Expanded Content */}
-                      <div className="flex flex-col items-center justify-center h-full py-12 px-4 space-y-6 opacity-0 animate-fade-in">
+                      <div className="flex flex-col items-center justify-center h-full py-12 px-4 space-y-6 animate-fade-in">
                         {/* Album Art */}
                         <div className="relative w-full max-w-md aspect-square">
                           {currentTrack.poster ? (
@@ -1250,6 +1261,27 @@ export default function Home() {
                     </>
                   )}
                 </div>
+
+                {/* Hidden audio element for playback */}
+                <audio 
+                  ref={audioRef} 
+                  style={{ display: 'none' }} 
+                  preload="auto"
+                  onTimeUpdate={() => {
+                    if (audioRef.current) {
+                      const percent = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+                      setProgress(percent);
+                    }
+                  }} 
+                  onEnded={() => {
+                    console.log('Track ended');
+                    setIsPlaying(false);
+                  }}
+                  onError={(e) => {
+                    console.error('Audio error:', e);
+                    setIsPlaying(false);
+                  }}
+                />
               </div>
             )}
 

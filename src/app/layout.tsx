@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
@@ -8,12 +8,15 @@ import { TransitionProvider } from '@/components/TransitionProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const viewport: Viewport = {
+  themeColor: '#000000',
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://lumensounds.vercel.app'),
   title: 'LUMEN',
   description: 'Discover and experience music in a whole new light. LUMEN offers a seamless journey through curated playlists, artist discoveries, and a vibrant community of music lovers.',
   manifest: '/manifest.json',
-  themeColor: '#000000',
   icons: {
     icon: '/disc.png',
   },
@@ -58,7 +61,6 @@ export default function RootLayout({
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="LUMEN" />
         <meta property="og:locale" content="en_US" />
-        <meta name="theme-color" content="#000000" />
         <meta name="google-site-verification" content="yQr2lvKsrMS9KjyUJkF3_RmEkCGGlKOw-DSfh1FygeI" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/disc.png" />
