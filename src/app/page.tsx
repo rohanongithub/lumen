@@ -633,6 +633,9 @@ export default function Home() {
     setIsProfileOpen(false);
     setIsLoggingOut(true);
     
+    // Set a flag that the Navbar component can check
+    sessionStorage.setItem('isLoggingOut', 'true');
+    
     // Show the logout message for 3 seconds, then fade out
     setTimeout(() => {
       setShowHopIn(true);
@@ -640,6 +643,9 @@ export default function Home() {
   };
 
   const handleHopIn = () => {
+    // Clear the logout flag
+    sessionStorage.removeItem('isLoggingOut');
+    
     // Keep both profile and liked songs data
     // Use the transition provider for smooth navigation
     startTransition(() => {

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HomeIcon, MagnifyingGlassIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useTransition } from './TransitionProvider';
 
@@ -74,6 +74,33 @@ export default function Navbar() {
   const router = useRouter();
   const { startTransition } = useTransition();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Check for logout state
+  useEffect(() => {
+    const checkLogoutState = () => {
+      const isLoggingOut = sessionStorage.getItem('isLoggingOut') === 'true';
+      setIsLoggingOut(isLoggingOut);
+    };
+
+    // Check on initial render
+    checkLogoutState();
+
+    // Set up event listener for storage changes
+    const handleStorageChange = () => {
+      checkLogoutState();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also set up a regular polling check
+    const interval = setInterval(checkLogoutState, 100);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   // Custom link handler with transition
   const handleNavigation = (href: string, e: React.MouseEvent) => {
@@ -220,56 +247,60 @@ export default function Navbar() {
         }
       `}</style>
 
-      <div className={`fixed left-6 top-4 flex flex-col z-[70] mobile-navbar`}>
-        {/* Navigation Container */}
-        <nav 
-          className="p-4 mobile-navbar-content" 
-          aria-label="Main navigation"
-        >
-          {/* Logo inside nav container */}
-          <div className="mb-8 text-center mobile-nav-logo">
-            <h1 className="text-2xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
-          </div>
-          
-          <div className="space-y-6 flex flex-col items-center mobile-nav-items">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
+      {!isLoggingOut && (
+        <>
+          <div className={`fixed left-6 top-4 flex flex-col z-[70] mobile-navbar`}>
+            {/* Navigation Container */}
+            <nav 
+              className="p-4 mobile-navbar-content" 
+              aria-label="Main navigation"
+            >
+              {/* Logo inside nav container */}
+              <div className="mb-8 text-center mobile-nav-logo">
+                <h1 className="text-2xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
+              </div>
               
-              return (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  onClick={(e) => handleNavigation(item.href, e)}
-                  className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
-                    isActive 
-                      ? 'bg-white/20 text-white' 
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
-                  }`}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  <Icon className="w-6 h-6" aria-hidden="true" />
-                  <span className="sr-only">{item.name}</span>
-                  <span className="absolute left-12 bg-black/70 text-white text-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap mobile-nav-tooltip">
-                    {item.name}
-                  </span>
-                </a>
-              );
-            })}
+              <div className="space-y-6 flex flex-col items-center mobile-nav-items">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href;
+                  
+                  return (
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      onClick={(e) => handleNavigation(item.href, e)}
+                      className={`group relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-white/20 text-white' 
+                          : 'text-white/60 hover:text-white hover:bg-white/10'
+                      }`}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      <Icon className="w-6 h-6" aria-hidden="true" />
+                      <span className="sr-only">{item.name}</span>
+                      <span className="absolute left-12 bg-black/70 text-white text-sm py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap mobile-nav-tooltip">
+                        {item.name}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </nav>
           </div>
-        </nav>
-      </div>
 
-      {/* Floating logo for mobile */}
-      <div className="block md:hidden mobile-floating-logo">
-        <a 
-          href="/"
-          onClick={(e) => handleNavigation('/', e)}
-          className="flex items-center justify-center"
-        >
-          <h1 className="text-xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
-        </a>
-      </div>
+          {/* Floating logo for mobile */}
+          <div className="block md:hidden mobile-floating-logo">
+            <a 
+              href="/"
+              onClick={(e) => handleNavigation('/', e)}
+              className="flex items-center justify-center"
+            >
+              <h1 className="text-xl font-normal tracking-wider text-white shadows-into-light-two">LUMEN</h1>
+            </a>
+          </div>
+        </>
+      )}
     </>
   );
 } 
