@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://lumensounds.vercel.app'),
   title: 'LUMEN',
   description: 'Discover and experience music in a whole new light. LUMEN offers a seamless journey through curated playlists, artist discoveries, and a vibrant community of music lovers.',
+  manifest: '/manifest.json',
+  themeColor: '#000000',
   icons: {
     icon: '/disc.png',
   },
@@ -56,6 +58,33 @@ export default function RootLayout({
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="LUMEN" />
         <meta property="og:locale" content="en_US" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="google-site-verification" content="yQr2lvKsrMS9KjyUJkF3_RmEkCGGlKOw-DSfh1FygeI" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/disc.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "LUMEN",
+              "url": "https://lumensounds.vercel.app",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://lumensounds.vercel.app/disc.png",
+                "width": 192,
+                "height": 192
+              },
+              "sameAs": [
+                "https://twitter.com/lumen",
+                "https://instagram.com/lumen",
+                "https://facebook.com/lumen"
+              ],
+              "description": "Discover and experience music in a whole new light. LUMEN offers a seamless journey through curated playlists, artist discoveries, and a vibrant community of music lovers."
+            })
+          }}
+        />
       </head>
       <body className={inter.className}>
         <PageBackground />

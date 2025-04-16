@@ -1,0 +1,54 @@
+{
+  "name": "LUMEN",
+  "short_name": "LUMEN",
+  "description": "Discover and experience music in a whole new light. LUMEN offers a seamless journey through curated playlists, artist discoveries, and a vibrant community of music lovers.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/disc.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/disc.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+} 
