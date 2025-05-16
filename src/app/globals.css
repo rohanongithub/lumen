@@ -20,6 +20,8 @@ body {
   padding: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  font-family: 'Myriad Pro', sans-serif;
+  font-weight: 300;
 }
 
 html, body {
@@ -36,4 +38,53 @@ html, body {
 .hide-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/fonts/Myriad Pro Font/MYRIADPRO-REGULAR.OTF') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/fonts/Myriad Pro Font/MYRIADPRO-BOLD.OTF') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/fonts/Myriad Pro Font/MYRIADPRO-BOLDIT.OTF') format('opentype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/fonts/Myriad Pro Font/MyriadPro-Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Myriad Pro';
+  src: url('/fonts/Myriad Pro Font/MYRIADPRO-SEMIBOLD.OTF') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+.myriad-pro {
+  font-family: 'Myriad Pro', sans-serif;
+}
+
+.myriad-pro-light {
+  font-family: 'Myriad Pro', sans-serif;
+  font-weight: 300;
 } 

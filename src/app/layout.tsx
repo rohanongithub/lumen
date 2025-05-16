@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar'
 import PageBackground from '@/components/PageBackground'
 import { TransitionProvider } from '@/components/TransitionProvider'
 
+// Keep Inter as a fallback font
 const inter = Inter({ subsets: ['latin'] })
 
 export const viewport: Viewport = {
@@ -88,7 +89,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body className="myriad-pro-light">
         <PageBackground />
         <TransitionProvider>
           <Navbar />
